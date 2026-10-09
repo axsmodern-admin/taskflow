@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import TaskEditor from "./TaskEditor";
 import type { TaskStatus, Priority } from "@prisma/client";
 import {
   cn,
@@ -31,6 +33,8 @@ function isOverdue(dueDate: string | null, status: string) {
 
 export default function TaskCard({ task, showClient = false }: { task: TaskView; showClient?: boolean }) {
   const router = useRouter();
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function changeStatus(value: string) {
     await fetch(`/api/tasks/${task.id}`, {
@@ -39,6 +43,18 @@ export default function TaskCard({ task, showClient = false }: { task: TaskView;
       body: JSON.stringify({ status: value }),
     });
     router.refresh();
+  }
+
+  async function remove() {
+    if (!window.confirm(`Delete "${task.title}"? This can't be undone.`)) return;
+    setDeleting(true);
+    const res = await fetch(`/api/tasks/${task.id}`, { method: "DELETE" });
+    if (res.ok) {
+      router.refresh();
+    } else {
+      setDeleting(false);
+      window.alert("Couldn't delete the task. Please try again.");
+    }
   }
 
   const overdue = isOverdue(task.dueDate, task.status);
@@ -97,6 +113,26 @@ export default function TaskCard({ task, showClient = false }: { task: TaskView;
           ))}
         </select>
       </div>
+
+      <div className="mt-2 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setEditing((v) => !v)}
+          className="text-xs font-medium text-slate-500 underline-offset-2 hover:text-slate-900 hover:underline"
+        >
+          {editing ? "Close editor" : "Edit"}
+        </button>
+        <button
+          type="button"
+          onClick={remove}
+          disabled={deleting}
+          className="text-xs font-medium text-red-500 underline-offset-2 hover:text-red-700 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {deleting ? "Deleting…" : "Delete"}
+        </button>
+      </div>
+
+      {editing && <TaskEditor task={task} onDone={() => setEditing(false)} />}
     </div>
   );
 }
