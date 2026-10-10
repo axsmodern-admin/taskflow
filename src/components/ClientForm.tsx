@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 const inputCls =
   "w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-300 focus:outline-none";
 
-export default function ClientForm() {
+export default function ClientForm({ bare = false, onDone }: { bare?: boolean; onDone?: () => void } = {}) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -27,8 +27,8 @@ export default function ClientForm() {
 
     setSaving(false);
     if (res.ok) {
-      router.push("/clients");
       router.refresh();
+      onDone?.();
     } else {
       const data = await res.json().catch(() => null);
       setError(data?.error ?? "Something went wrong. Please try again.");
@@ -36,7 +36,10 @@ export default function ClientForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <form
+      onSubmit={handleSubmit}
+      className={bare ? "space-y-4" : "space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"}
+    >
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700">Client name *</label>
         <input
