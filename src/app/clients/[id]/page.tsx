@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { cn, STATUS_BADGES, STATUS_LABELS } from "@/lib/utils";
 import TaskCard, { TaskView } from "@/components/TaskCard";
+import AddTaskModal from "@/components/AddTaskModal";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,11 @@ export default async function ClientDetailPage({
   const open = tasks.filter((t) => t.status !== "DONE");
   const done = tasks.filter((t) => t.status === "DONE");
 
+  const [allClients, users] = await Promise.all([
+    prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.user.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+  ]);
+
   return (
     <div className="mx-auto max-w-4xl space-y-8 px-4 py-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -45,12 +51,7 @@ export default async function ClientDetailPage({
             {open.length} open task{open.length === 1 ? "" : "s"} · {done.length} completed
           </p>
         </div>
-        <Link
-          href="/tasks/new"
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
-        >
-          + New task
-        </Link>
+        <AddTaskModal clients={allClients} users={users} defaultClientId={id} />
       </div>
 
       {open.length > 0 && (

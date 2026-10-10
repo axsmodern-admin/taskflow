@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { cn, STATUS_BADGES, STATUS_LABELS, formatDueDate } from "@/lib/utils";
+import AddTaskModal from "@/components/AddTaskModal";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +57,11 @@ export default async function DashboardPage() {
     .sort((a, b) => new Date(a.dueDate ?? 0).getTime() - new Date(b.dueDate ?? 0).getTime())
     .slice(0, 8);
 
+  const [clients, users] = await Promise.all([
+    prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.user.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+  ]);
+
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -65,12 +71,7 @@ export default async function DashboardPage() {
           </h1>
           <p className="mt-1 text-sm text-slate-500">Here&apos;s where your team stands today.</p>
         </div>
-        <Link
-          href="/tasks/new"
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
-        >
-          + New task
-        </Link>
+        <AddTaskModal clients={clients} users={users} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

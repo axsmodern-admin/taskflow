@@ -10,9 +10,15 @@ const inputCls =
 export default function NewTaskForm({
   clients,
   users,
+  bare = false,
+  onDone,
+  defaultClientId,
 }: {
   clients: { id: string; name: string }[];
   users: { id: string; name: string }[];
+  bare?: boolean;
+  onDone?: () => void;
+  defaultClientId?: string;
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +26,7 @@ export default function NewTaskForm({
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [clientId, setClientId] = useState(clients[0]?.id ?? "");
+  const [clientId, setClientId] = useState(defaultClientId ?? clients[0]?.id ?? "");
   const [priority, setPriority] = useState("MEDIUM");
   const [dueDate, setDueDate] = useState("");
   const [assignees, setAssignees] = useState<string[]>([]);
@@ -51,8 +57,9 @@ export default function NewTaskForm({
 
     setSaving(false);
     if (res.ok) {
-      router.push("/board");
+      if (!bare) router.push("/board");
       router.refresh();
+      onDone?.();
     } else {
       const data = await res.json().catch(() => null);
       setError(data?.error ?? "Something went wrong. Please try again.");
@@ -74,7 +81,7 @@ export default function NewTaskForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className={bare ? "space-y-4" : "space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"}>
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700">Task title *</label>
         <input

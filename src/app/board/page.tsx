@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { cn, STATUS_ORDER, STATUS_LABELS } from "@/lib/utils";
 import TaskCard, { TaskView } from "@/components/TaskCard";
+import AddTaskModal from "@/components/AddTaskModal";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +11,17 @@ export default async function BoardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const tasks = (await prisma.task.findMany({
-    include: {
-      client: { select: { id: true, name: true } },
-      assignments: { include: { user: { select: { id: true, name: true } } } },
-    },
-    orderBy: { dueDate: { sort: "asc", nulls: "last" } },
-  })) as unknown as TaskView[];
+  const [tasks, clients, users] = await Promise.all([
+    prisma.task.findMany({
+      include: {
+        client: { select: { id: true, name: true } },
+        assignments: { include: { user: { select: { id: true, name: true } } } },
+      },
+      orderBy: { dueDate: { sort: "asc", nulls: "last" } },
+    }),
+    prisma.client.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.user.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+  ]) as unknown as [TaskView[], { id: string; name: string }[], { id: string; name: string }[]]
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
@@ -26,12 +30,7 @@ export default async function BoardPage() {
           <h1 className="text-2xl font-semibold text-slate-900">Board</h1>
           <p className="mt-1 text-sm text-slate-500">All tasks across all clients. Change a status with the dropdown on each card.</p>
         </div>
-        <Link
-          href="/tasks/new"
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700"
-        >
-          + New task
-        </Link>
+        <AddTaskModal clients={clients} users={users} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
