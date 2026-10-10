@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
@@ -17,11 +18,8 @@ export default async function Nav() {
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-3">
-        <Link href="/" className="mr-4 flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-sm font-bold text-white">
-            TF
-          </span>
-          <span className="text-base font-semibold text-slate-900">TaskFlow</span>
+        <Link href="/" className="mr-4 flex items-center">
+          <Image src="/logo.png" alt="AXS Modern" className="h-7 w-auto" />
         </Link>
 
         <nav className="flex flex-wrap items-center gap-1">

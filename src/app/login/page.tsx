@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -44,9 +45,7 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-lg font-bold text-white">
-            TF
-          </span>
+          <Image src="/logo.png" alt="AXS Modern" className="mx-auto h-10 w-auto" />
           <h1 className="mt-3 text-xl font-semibold text-slate-900">TaskFlow</h1>
           <p className="mt-1 text-sm text-slate-500">
             {mode === "login" ? "Log in to continue" : "Create the first account"}

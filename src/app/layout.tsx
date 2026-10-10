@@ -4,7 +4,7 @@ import Nav from "@/components/Nav";
 import { getCurrentUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "TaskFlow",
+  title: "TaskFlow · AXS Modern",
   description: "Client work tracking for your team",
 };
 
